@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NUTTATIDA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Prompt:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FBF9FD;
+    --bg-soft: #F3EDFB;
+    --lavender: #E4D6F7;
+    --lavender-deep: #C9A8E8;
+    --purple: #8B6FB3;
+    --purple-deep: #6B4E96;
+    --plum: #3A2C4D;
+    --plum-soft: #6E5D80;
+    --white: #FFFFFF;
+    --line: rgba(139,111,179,0.18);
+    --shadow: 0 20px 60px rgba(139,111,179,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Prompt',sans-serif;
+    background:var(--bg);
+    color:var(--plum);
+    overflow-x:hidden;
+    font-weight:300;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Cormorant Garamond','Prompt',serif;
+    font-weight:500;
+    letter-spacing:0.01em;
+  }
+  ::selection{background:var(--lavender-deep);color:var(--white);}
+ 
+  /* ===== blob background ===== */
+  .blob-field{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.5;}
+  .blob1{width:520px;height:520px;background:radial-gradient(circle,var(--lavender) 0%, transparent 70%);top:-180px;right:-160px;animation:drift1 22s ease-in-out infinite;}
+  .blob2{width:420px;height:420px;background:radial-gradient(circle,var(--lavender-deep) 0%, transparent 70%);bottom:-120px;left:-140px;opacity:0.35;animation:drift2 26s ease-in-out infinite;}
+  .blob3{width:300px;height:300px;background:radial-gradient(circle,var(--purple) 0%, transparent 70%);top:40%;left:55%;opacity:0.18;animation:drift1 30s ease-in-out infinite reverse;}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-40px,30px) scale(1.08);}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-30px) scale(1.05);}}
+  @media (prefers-reduced-motion: reduce){.blob{animation:none;}}
+ 
+  /* ===== nav ===== */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 6vw;
+    background:rgba(251,249,253,0.75);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+    transition:padding .3s ease;
+  }
+  .logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--plum);letter-spacing:0.04em;cursor:pointer;}
+  .logo span{color:var(--purple);}
+  .nav-links{display:flex;gap:2.4rem;list-style:none;}
+  .nav-links button{
+    background:none;border:none;font-family:'Prompt',sans-serif;font-size:0.92rem;font-weight:400;
+    color:var(--plum-soft);cursor:pointer;letter-spacing:0.03em;position:relative;padding:4px 0;
+    transition:color .25s ease;
+  }
+  .nav-links button::after{
+    content:'';position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--purple);transition:width .3s ease;
+  }
+  .nav-links button.active, .nav-links button:hover{color:var(--purple-deep);}
+  .nav-links button.active::after, .nav-links button:hover::after{width:100%;}
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;}
+  .nav-toggle span{display:block;width:24px;height:1px;background:var(--plum);margin:6px 0;}
+ 
+  main{position:relative;z-index:1;min-height:100vh;}
+  .page{display:block;opacity:0;transform:translateY(24px);transition:opacity .8s ease, transform .8s ease;scroll-margin-top:90px;}
+  .page.in-view{opacity:1;transform:translateY(0);}
+  .page#page-home{opacity:1;transform:translateY(0);}
+ 
+  .wrap{max-width:1080px;margin:0 auto;padding:0 6vw;}
+ 
+  /* ===== Hero ===== */
+  .hero{min-height:100vh;display:flex;align-items:center;padding-top:90px;}
+  .hero-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:4rem;align-items:center;width:100%;}
+  .eyebrow{
+    font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--purple);
+    display:flex;align-items:center;gap:10px;margin-bottom:1.4rem;
+  }
+  .eyebrow::before{content:'';width:30px;height:1px;background:var(--purple);}
+  .hero h1{font-size:clamp(2.6rem,5.5vw,4.6rem);line-height:1.08;color:var(--plum);margin-bottom:1.3rem;}
+  .hero h1 em{font-style:italic;color:var(--purple-deep);}
+  .hero p.lead{font-size:1.08rem;color:var(--plum-soft);max-width:480px;line-height:1.8;margin-bottom:2.2rem;font-weight:300;}
+  .btn-row{display:flex;gap:1rem;flex-wrap:wrap;}
+  .btn{
+    padding:14px 30px;border-radius:999px;font-family:'Prompt';font-size:0.92rem;letter-spacing:0.02em;
+    cursor:pointer;transition:all .3s ease;border:1px solid transparent;
+  }
+  .btn-primary{background:var(--purple-deep);color:var(--white);}
+  .btn-primary:hover{background:var(--plum);transform:translateY(-2px);box-shadow:var(--shadow);}
+  .btn-ghost{background:transparent;color:var(--purple-deep);border-color:var(--purple-deep);}
+  .btn-ghost:hover{background:var(--lavender);transform:translateY(-2px);}
+ 
+  .hero-art{
+    aspect-ratio:0.85;border-radius:40% 60% 55% 45% / 50% 45% 55% 50%;
+    background:linear-gradient(150deg,var(--lavender) 0%, var(--lavender-deep) 55%, var(--purple) 100%);
+    box-shadow:var(--shadow);position:relative;display:flex;align-items:center;justify-content:center;
+    animation:morph 12s ease-in-out infinite;overflow:hidden;
+  }
+  .hero-art img{width:100%;height:100%;object-fit:cover;display:block;}
+  @keyframes morph{
+    0%,100%{border-radius:40% 60% 55% 45% / 50% 45% 55% 50%;}
+    50%{border-radius:58% 42% 40% 60% / 45% 55% 45% 55%;}
+  }
+  .hero-art .initial{font-family:'Cormorant Garamond',serif;font-size:7rem;color:var(--white);font-style:italic;opacity:0.92;}
+ 
+  .scroll-cue{position:absolute;bottom:40px;left:6vw;font-size:0.75rem;letter-spacing:0.15em;color:var(--plum-soft);display:flex;align-items:center;gap:10px;}
+  .scroll-cue .line{width:1px;height:34px;background:linear-gradient(var(--purple), transparent);}
+ 
+  /* ===== section heading pattern ===== */
+  .section-top{padding:130px 0 50px;}
+  .kicker{font-size:0.78rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--purple);margin-bottom:1rem;}
+  .section-title{font-size:clamp(2.1rem,4vw,3rem);color:var(--plum);margin-bottom:1.2rem;}
+  .section-sub{color:var(--plum-soft);max-width:560px;line-height:1.8;font-weight:300;}
+ 
+  /* ===== About ===== */
+  .about-body{padding-bottom:120px;}
+  .about-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:4rem;align-items:start;margin-top:3rem;}
+  .about-portrait{
+    aspect-ratio:0.9;border-radius:24px;background:linear-gradient(160deg,var(--bg-soft),var(--lavender));
+    box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .about-portrait img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1;}
+  .about-text p{color:var(--plum-soft);line-height:1.9;margin-bottom:1.3rem;font-weight:300;font-size:1rem;}
+  .about-text strong{color:var(--plum);font-weight:500;}
+ 
+  .skill-list{margin-top:2rem;display:flex;flex-direction:column;gap:1.1rem;}
+  .skill-row{display:grid;grid-template-columns:120px 1fr;align-items:center;gap:1rem;}
+  .skill-name{font-size:0.88rem;color:var(--plum);letter-spacing:0.02em;}
+  .skill-bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;}
+  .skill-fill{height:100%;background:linear-gradient(90deg,var(--lavender-deep),var(--purple-deep));border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 1.2s cubic-bezier(.2,.8,.2,1);}
+  .page.in-view .skill-fill, .page#page-home .skill-fill{transform:scaleX(1);}
+ 
+  .timeline{margin-top:3.5rem;border-top:1px solid var(--line);}
+  .tl-row{display:grid;grid-template-columns:140px 1fr;gap:2rem;padding:1.6rem 0;border-bottom:1px solid var(--line);}
+  .tl-year{font-family:'Cormorant Garamond';font-size:1.3rem;color:var(--purple-deep);font-style:italic;}
+  .tl-title{color:var(--plum);font-weight:500;margin-bottom:0.3rem;}
+  .tl-desc{color:var(--plum-soft);font-size:0.92rem;font-weight:300;}
+ 
+  /* ===== Work ===== */
+  .work-body{padding-bottom:120px;}
+  .work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-top:3rem;}
+  .work-card{
+    background:var(--white);border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 8px 30px rgba(139,111,179,0.06);cursor:pointer;transition:transform .4s ease, box-shadow .4s ease;
+  }
+  .work-card:hover{transform:translateY(-8px);box-shadow:var(--shadow);}
+  .work-thumb{aspect-ratio:16/10;background:linear-gradient(135deg,var(--bg-soft),var(--lavender));position:relative;display:flex;align-items:center;justify-content:center;}
+  .work-thumb .tag{font-family:'Cormorant Garamond';font-style:italic;font-size:2.2rem;color:var(--purple-deep);opacity:0.55;}
+  .work-info{padding:1.6rem 1.8rem 1.9rem;}
+  .work-cat{font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--purple);margin-bottom:0.5rem;}
+  .work-name{font-size:1.25rem;color:var(--plum);margin-bottom:0.5rem;font-family:'Cormorant Garamond';font-weight:600;}
+  .work-desc{color:var(--plum-soft);font-size:0.88rem;line-height:1.7;font-weight:300;}
+ 
+  /* ===== Contact ===== */
+  .contact-body{padding-bottom:140px;}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-top:3rem;}
+  .contact-info-card{
+    background:linear-gradient(160deg,var(--purple-deep),var(--plum));
+    border-radius:24px;padding:3rem 2.4rem;color:var(--white);box-shadow:var(--shadow);
+    display:flex;flex-direction:column;justify-content:space-between;min-height:380px;
+  }
+  .contact-info-card h3{font-size:1.7rem;margin-bottom:1.2rem;}
+  .contact-info-card p{color:rgba(255,255,255,0.78);line-height:1.8;font-weight:300;font-size:0.95rem;}
+  .contact-channels{margin-top:2rem;display:flex;flex-direction:column;gap:1rem;}
+  .channel{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.18);padding-bottom:0.8rem;font-size:0.9rem;}
+  .channel span:first-child{color:rgba(255,255,255,0.6);}
+ 
+  form{display:flex;flex-direction:column;gap:1.3rem;}
+  .field label{display:block;font-size:0.8rem;color:var(--plum-soft);margin-bottom:0.5rem;letter-spacing:0.02em;}
+  .field input, .field textarea{
+    width:100%;border:none;border-bottom:1px solid var(--line);background:transparent;
+    padding:10px 2px;font-family:'Prompt';font-size:0.95rem;color:var(--plum);outline:none;
+    transition:border-color .3s ease;resize:none;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--purple-deep);}
+  .field textarea{min-height:90px;}
+  form .btn{align-self:flex-start;margin-top:0.5rem;}
+  .form-note{font-size:0.78rem;color:var(--plum-soft);margin-top:1rem;}
+ 
+  footer{
+    border-top:1px solid var(--line);padding:2.2rem 6vw;display:flex;justify-content:space-between;
+    align-items:center;color:var(--plum-soft);font-size:0.82rem;position:relative;z-index:1;
+  }
+ 
+  @media (max-width:840px){
+    .nav-links{position:fixed;top:0;right:0;height:100vh;width:74vw;background:var(--white);
+      flex-direction:column;justify-content:center;gap:2rem;padding:2rem;transform:translateX(100%);
+      transition:transform .4s ease;box-shadow:-10px 0 40px rgba(0,0,0,0.08);}
+    .nav-links.open{transform:translateX(0);}
+    .nav-toggle{display:block;}
+    .hero-grid, .about-grid, .work-grid, .contact-grid{grid-template-columns:1fr;}
+    .hero-art{max-width:280px;margin:0 auto;}
+    .work-grid{gap:1.4rem;}
+    footer{flex-direction:column;gap:0.6rem;text-align:center;}
+  }
+</style>
+</head>
+<body>
+ 
+<div class="blob-field">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+ 
+<nav>
+  <div class="logo" onclick="go('home')">NUTTATIDA<span>.</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><button onclick="go('home')" data-page="home">หน้าแรก</button></li>
+    <li><button onclick="go('about')" data-page="about">เกี่ยวกับ</button></li>
+    <li><button onclick="go('work')" data-page="work">ผลงาน</button></li>
+    <li><button onclick="go('contact')" data-page="contact">ติดต่อ</button></li>
+  </ul>
+  <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+ 
+<main>
+ 
+  <section class="page active" id="page-home">
+    <div class="hero wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">PORTFOLIO — 2026</div>
+          <h1>พัฒนาระบบและเว็บไซต์<br>ด้วยความ<em>ใส่ใจ</em><br>และตั้งใจ</h1>
+          <p class="lead">สวัสดีค่ะ ดิฉันชื่อ ณัฏฐธิดา — Junior Web Developer และนักพัฒนาที่หลงใหลในการสร้างสรรค์ระบบเทคโนโลยีและเว็บไซต์ ยินดีต้อนรับสู่พื้นที่รวบรวมผลงานของดิฉันค่ะ</p>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="go('work')">ดูผลงาน</button>
+            <button class="btn btn-ghost" onclick="go('contact')">ติดต่อฉัน</button>
+          </div>
+        </div>
+        <div class="hero-art"><img src="images/hero.jpg" alt="รูปโปรไฟล์"></div>
+      </div>
+    </div>
+    <div class="scroll-cue"><div class="line"></div>เลื่อนลง</div>
+  </section>
+ 
+  <section class="page" id="page-about">
+    <div class="wrap">
+      <div class="section-top">
+        <div class="kicker">About Me</div>
+        <h2 class="section-title">เรื่องราวของฉัน</h2>
+        <p class="section-sub">เส้นทางสายเทคโนโลยีที่เริ่มจากความหลงใหลในการเขียนโค้ดและสร้างสรรค์สิ่งใหม่</p>
+      </div>
+ 
+      <div class="about-grid">
+        <div class="about-portrait"><img src="images/about.jpg" alt="รูปเกี่ยวกับฉัน"></div>
+        <div class="about-text">
+          <p>ดิฉัน <strong>ณัฏฐธิดา สอนทวี</strong> สำเร็จการศึกษาจากสาขาวิทยาการคอมพิวเตอร์ คณะเทคโนโลยีสารสนเทศ มหาวิทยาลัยราชภัฏเทพสตรี ปัจจุบันเป็น Junior Web Developer และผู้ประกอบการธุรกิจ</p>
+          <p>ดิฉันมีความสนใจอย่างลึกซึ้งในการพัฒนาระบบหลังบ้าน (Backend) ด้วยโครงสร้างแบบ PHP MVC ตลอดจนการประยุกต์ใช้ฮาร์ดแวร์และ IoT เพื่อสร้างโซลูชันที่ตอบโจทย์การใช้งานจริง ควบคู่ไปกับการบริหารงานและใช้สื่อดิจิทัลในการขับเคลื่อนธุรกิจส่วนตัว</p>
+ 
+          <div class="skill-list">
+            <div class="skill-row"><div class="skill-name">Web Dev (PHP MVC)</div><div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div></div>
+            <div class="skill-row"><div class="skill-name">IoT & Hardware</div><div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div></div>
+            <div class="skill-row"><div class="skill-name">Database Mgmt</div><div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div></div>
+            <div class="skill-row"><div class="skill-name">Business Management</div><div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div></div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="timeline">
+        <div class="tl-row">
+          <div class="tl-year">2026 — ปัจจุบัน</div>
+          <div><div class="tl-title">Junior Web Developer & Entrepreneur</div><div class="tl-desc">พัฒนาระบบเว็บไซต์ และบริหารร้านอาหาร "เตี๊ยวทางโค้ง" ควบคู่กับแบรนด์เครื่องประดับ "www.lenbo"</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-year">2025 — 2026</div>
+          <div><div class="tl-title">ประธานองค์การบริหารสโมสรนักศึกษา</div><div class="tl-desc">คณะเทคโนโลยีสารสนเทศ มหาวิทยาลัยราชภัฏเทพสตรี</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-year">2022 — 2026</div>
+          <div><div class="tl-title">ปริญญาตรี วิทยาการคอมพิวเตอร์</div><div class="tl-desc">คณะเทคโนโลยีสารสนเทศ มหาวิทยาลัยราชภัฏเทพสตรี — เกรดเฉลี่ย 3.00</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section class="page" id="page-work">
+    <div class="wrap">
+      <div class="section-top">
+        <div class="kicker">Selected Work</div>
+        <h2 class="section-title">ผลงานที่ภาคภูมิใจ</h2>
+        <p class="section-sub">ตัวอย่างผลงานเด่นจากโปรเจกต์ที่ผ่านมา ทั้งการพัฒนาระบบ งานฮาร์ดแวร์ และการจัดการแบรนด์</p>
+      </div>
+ 
+      <div class="work-grid">
+        <div class="work-card">
+          <div class="work-thumb"><span class="tag">TBMS</span></div>
+          <div class="work-info"><div class="work-cat">Web System</div><div class="work-name">ระบบบริการการเงินและบัญชี</div><div class="work-desc">พัฒนาระบบบริการการเงินและบัญชีด้วยโครงสร้าง PHP MVC ช่วงระหว่างการฝึกงานที่ อบต.ท่าวุ้ง</div></div>
+        </div>
+        <div class="work-card">
+          <div class="work-thumb"><span class="tag">IoT</span></div>
+          <div class="work-info"><div class="work-cat">Hardware & IoT</div><div class="work-name">โปรเจกต์ต้นฟ้าทะลายโจร</div><div class="work-desc">พัฒนาระบบกึ่งอัตโนมัติเพื่อการปลูกต้นฟ้าทะลายโจร ผสานการใช้งานร่วมกับฮาร์ดแวร์และเซ็นเซอร์</div></div>
+        </div>
+        <div class="work-card">
+          <div class="work-thumb"><span class="tag">Food</span></div>
+          <div class="work-info"><div class="work-cat">Business & Marketing</div><div class="work-name">ร้านเตี๊ยวทางโค้ง</div><div class="work-desc">ดูแลกลยุทธ์การโปรโมทผ่านสื่อดิจิทัลและบริหารจัดการร้านอาหารแบบครบวงจรของครอบครัว</div></div>
+        </div>
+        <div class="work-card">
+          <div class="work-thumb"><span class="tag">Y2K</span></div>
+          <div class="work-info"><div class="work-cat">E-Commerce</div><div class="work-name">แบรนด์ www.lenbo</div><div class="work-desc">ก่อตั้งและบริหารแบรนด์เครื่องประดับสไตล์ดิจิทัลเรโทร Y2K พร้อมดูแลภาพลักษณ์แบรนด์แบบเต็มรูปแบบ</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section class="page" id="page-contact">
+    <div class="wrap">
+      <div class="section-top">
+        <div class="kicker">Get In Touch</div>
+        <h2 class="section-title">มาพูดคุยกันค่ะ</h2>
+        <p class="section-sub">สนใจร่วมงาน พัฒนาระบบ หรืออยากพูดคุยเกี่ยวกับโปรเจกต์ ติดต่อมาได้เลยค่ะ</p>
+      </div>
+ 
+      <div class="contact-grid">
+        <div class="contact-info-card">
+          <div>
+            <h3>มาสร้างสรรค์ไปด้วยกัน</h3>
+            <p>เปิดรับงานพัฒนาระบบ งานโปรเจกต์ และพร้อมแลกเปลี่ยนไอเดียใหม่ๆ เพื่อสร้างโซลูชันที่ดีที่สุด</p>
+          </div>
+          <div class="contact-channels">
+            <div class="channel"><span>อีเมล</span><span>nuttatida@email.com</span></div>
+            <div class="channel"><span>โทรศัพท์</span><span>08X-XXX-XXXX</span></div>
+            <div class="channel"><span>เว็บไซต์แบรนด์</span><span>www.lenbo</span></div>
+            <div class="channel"><span>ธุรกิจร้านอาหาร</span><span>ร้านเตี๊ยวทางโค้ง</span></div>
+          </div>
+        </div>
+ 
+        <form onsubmit="handleSubmit(event)">
+          <div class="field">
+            <label>ชื่อของคุณ</label>
+            <input type="text" placeholder="กรอกชื่อ" required>
+          </div>
+          <div class="field">
+            <label>อีเมล</label>
+            <input type="email" placeholder="example@email.com" required>
+          </div>
+          <div class="field">
+            <label>ข้อความ</label>
+            <textarea placeholder="เล่าเกี่ยวกับโปรเจกต์ของคุณ..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">ส่งข้อความ</button>
+          <p class="form-note" id="formNote">* ฟอร์มนี้เป็นตัวอย่างสำหรับการแสดงผลเท่านั้น</p>
+        </form>
+      </div>
+    </div>
+  </section>
+ 
+</main>
+ 
+<footer>
+  <div>© 2026 ณัฏฐธิดา ศรทวี. สงวนลิขสิทธิ์</div>
+  <div>Designed and Developed with care</div>
+</footer>
+ 
+<script>
+  function go(pageId){
+    document.getElementById('page-' + pageId).scrollIntoView({behavior:'smooth'});
+    document.getElementById('navLinks').classList.remove('open');
+  }
+ 
+  // reveal sections as they scroll into view
+  const sections = document.querySelectorAll('.page');
+  const navButtons = document.querySelectorAll('.nav-links button');
+ 
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add('in-view');
+    });
+  }, {threshold:0.15});
+  sections.forEach(s => revealObserver.observe(s));
+ 
+  const spyObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id.replace('page-','');
+        navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === id));
+      }
+    });
+  }, {threshold:0.5});
+  sections.forEach(s => spyObserver.observe(s));
+ 
+  function handleSubmit(e){
+    e.preventDefault();
+    document.getElementById('formNote').textContent = 'ขอบคุณค่ะ! ข้อความถูกบันทึกในตัวอย่างนี้ (ยังไม่เชื่อมต่อระบบส่งจริง)';
+    e.target.reset();
+  }
+</script>
+ 
+</body>
+</html>
